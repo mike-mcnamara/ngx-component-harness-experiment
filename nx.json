@@ -1,0 +1,30 @@
+{
+  "npmScope": "test",
+  "implicitDependencies": {
+    "angular.json": "*",
+    "package.json": {
+      "dependencies": "*",
+      "devDependencies": "*"
+    },
+    "tsconfig.json": "*",
+    "tslint.json": "*",
+    "nx.json": "*"
+  },
+  "tasksRunnerOptions": {
+    "default": {
+      "runner": "@nrwl/workspace/tasks-runners/default",
+      "options": {
+        "cacheableOperations": ["build", "lint", "test", "e2e"]
+      }
+    }
+  },
+  "projects": {
+    "ngx-component-harnesses": {
+      "tags": []
+    },
+    "cypress": {
+      "tags": [],
+      "implicitDependencies": ["ngx-component-harnesses"]
+    }
+  }
+}
