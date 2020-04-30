@@ -130,12 +130,20 @@
         "lint": {
           "builder": "@angular-devkit/build-angular:tslint",
           "options": {
-            "tsConfig": ["cypress/tsconfig.e2e.json"],
-            "exclude": ["**/node_modules/**", "!cypress/**"]
+            "tsConfig": [
+              "cypress/tsconfig.e2e.json"
+            ],
+            "exclude": [
+              "**/node_modules/**",
+              "!cypress/**"
+            ]
           }
         }
       }
     }
   },
-  "defaultProject": "ngx-component-harnesses"
+  "defaultProject": "ngx-component-harnesses",
+  "cli": {
+    "analytics": false
+  }
 }
