@@ -7,7 +7,8 @@
     "build": "ng build",
     "test": "ng test",
     "lint": "ng lint",
-    "e2e": "ng e2e"
+    "e2e": "ng e2e",
+    "cypr": "CYPRESS_REMOTE_DEBUGGING_PORT=9222 ng e2e --watch"
   },
   "private": true,
   "dependencies": {

@@ -1,4 +1,4 @@
-import * as keyCodes from '@angular/cdk/keycodes';
+// import * as keyCodes from '@angular/cdk/keycodes'; // might need to use this if going trigger route
 import {
   ElementDimensions,
   ModifierKeys,
@@ -64,7 +64,7 @@ export class CypressElement implements TestElement {
 
   async blur(): Promise<void> {
     // browser.executeScript('arguments[0].blur()', this.element);
-    this.element.focus().blur();
+    this.element.focus().blur(); // .promisify().then(); // works too
     return this._stabilize();
   }
 
@@ -168,40 +168,36 @@ export class CypressElement implements TestElement {
   }
 
   async getDimensions(): Promise<ElementDimensions> {
-    let width;
-    const height;
-    // this.element.its('height');
-    const { x: left, y: top } = await this.element.getLocation();
-
-    this.element
-      .its('width')
-      .then((val: number) => {
-        width = val;
-      });
+    const width = await this.element.invoke('width').promisify() || 0;
+    const height = await this.element.invoke('height').promisify() || 0;
+    const { left, top } = await this.element.invoke('position').promisify();
 
     return { width, height, left, top };
   }
 
   async getProperty(name: string): Promise<any> {
-    return browser.executeScript(
-      `return arguments[0][arguments[1]]`,
-      this.element,
-      name
-    );
+    // return browser.executeScript(
+    //   `return arguments[0][arguments[1]]`,
+    //   this.element,
+    //   name
+    // );
+    return this.element.its(name).promisify();
   }
 
   async matchesSelector(selector: string): Promise<boolean> {
-    return browser.executeScript(
-      `
-          return (Element.prototype.matches ||
-                  Element.prototype.msMatchesSelector).call(arguments[0], arguments[1])
-          `,
-      this.element,
-      selector
-    );
+    // return browser.executeScript(
+    //   `
+    //       return (Element.prototype.matches ||
+    //               Element.prototype.msMatchesSelector).call(arguments[0], arguments[1])
+    //       `,
+    //   this.element,
+    //   selector
+    // );
+    return this.element.then($el => $el.is(selector)).promisify();
   }
 
   async isFocused(): Promise<boolean> {
-    return this.element.equals(browser.driver.switchTo().activeElement());
+    // return this.element.equals(browser.driver.switchTo().activeElement());
+    return this.element.then(($el) => $el.is(document.activeElement || '')).promisify();
   }
 }
