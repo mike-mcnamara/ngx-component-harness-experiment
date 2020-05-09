@@ -20,12 +20,13 @@ export interface CypressHarnessEnvironmentOptions {
   queryFn: (
     selector: string,
     root: Cypress.Chainable<JQuery<HTMLElement>>
-  ) => Cypress.Chainable<JQuery<HTMLElement>>;
+  ) => Promise<Cypress.Chainable<JQuery<HTMLElement>>>;
 }
 
 // /** The default environment options. */
 const defaultEnvironmentOptions: CypressHarnessEnvironmentOptions = {
-  queryFn: (selector: string, root: Cypress.Chainable<JQuery<HTMLElement>>) => root.get(selector)
+  queryFn: (selector: string, root: Cypress.Chainable<JQuery<HTMLElement>>) =>
+    new Cypress.Promise((resolve, reject) => resolve(root.get(selector)))
 };
 
 /** A `HarnessEnvironment` implementation for Angular's Testbed. */
@@ -43,7 +44,7 @@ export class CypressHarnessEnvironment extends HarnessEnvironment<
 
   /** Creates a `HarnessLoader` rooted at the given fixture's root element. */
   static loader(options?: CypressHarnessEnvironmentOptions): HarnessLoader {
-    return new CypressHarnessEnvironment(cy.get('body'), options);
+    return new CypressHarnessEnvironment(cy.root(), options);
   }
 
   /**
@@ -51,7 +52,7 @@ export class CypressHarnessEnvironment extends HarnessEnvironment<
    * located outside of a fixture (e.g. overlays appended to the document body).
    */
   static documentRootLoader(): HarnessLoader {
-    return new CypressHarnessEnvironment(cy.get('body'));
+    return new CypressHarnessEnvironment(cy.root());
   }
 
   async forceStabilize(): Promise<void> {}
@@ -59,7 +60,7 @@ export class CypressHarnessEnvironment extends HarnessEnvironment<
   async waitForTasksOutsideAngular(): Promise<void> {}
 
   protected getDocumentRoot(): Cypress.Chainable<JQuery<HTMLElement>> {
-    return cy.get('body');
+    return cy.root();
   }
 
   protected createTestElement(
@@ -77,12 +78,8 @@ export class CypressHarnessEnvironment extends HarnessEnvironment<
   protected async getAllRawElements(
     selector: string
   ): Promise<Cypress.Chainable<JQuery<HTMLElement>>[]> {
-    const elementArrayFinder = this._options.queryFn(
-      selector,
-      this.rawRootElement
-    );
-    const elements: Cypress.Chainable<JQuery<HTMLElement>>[] = [];
-    await elementArrayFinder.each(($el) => elements.push(cy.wrap($el))).promisify();
+    const $el = Cypress.$(selector);
+    const elements: Cypress.Chainable<JQuery<HTMLElement>>[] = Cypress.dom.unwrap($el);
     return elements;
   }
 }

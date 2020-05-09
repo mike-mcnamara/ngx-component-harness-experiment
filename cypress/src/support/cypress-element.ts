@@ -63,13 +63,15 @@ export class CypressElement implements TestElement {
   constructor(readonly element: Cypress.Chainable<JQuery<HTMLElement>>, private _stabilize: () => Promise<void>) {}
 
   async blur(): Promise<void> {
-    // browser.executeScript('arguments[0].blur()', this.element);
-    this.element.focus().blur(); // .promisify().then(); // works too
+    // browser.executeScript('arguments[0].blur()', cy.wrap(this.element));
+    debugger;
+    cy.wrap(this.element).focus().blur(); // .promisify().then(); // works too
     return this._stabilize();
   }
 
   async clear(): Promise<void> {
-    this.element.clear();
+    debugger;
+    cy.wrap(this.element).clear();
     return this._stabilize();
   }
 
@@ -82,33 +84,32 @@ export class CypressElement implements TestElement {
 
     // await browser
     //   .actions()
-    //   .mouseMove(await this.element.getWebElement(), ...offsetArgs)
+    //   .mouseMove(await cy.wrap(this.element).getWebElement(), ...offsetArgs)
     //   .click()
     //   .perform();
-
-    this.element.click(); // TODO ignore the x,y for now...
-    return this._stabilize();
+    Cypress.$(this.element).trigger('click'); // TODO ignore the x,y for now...
   }
 
   async focus(): Promise<void> {
-    // return browser.executeScript('arguments[0].focus()', this.element);
-    this.element.focus();
+    // return browser.executeScript('arguments[0].focus()', cy.wrap(this.element));
+    debugger;
+    cy.wrap(this.element).focus();
     return this._stabilize();
   }
 
   async getCssValue(property: string): Promise<string> {
-    // return this.element.getCssValue(property);
-
+    // return cy.wrap(this.element).getCssValue(property);
+    debugger;
     return await this.getAttribute(property) || '';
   }
 
   async hover(): Promise<void> {
     //  return browser
     //    .actions()
-    //    .mouseMove(await this.element.getWebElement())
+    //    .mouseMove(await cy.wrap(this.element).getWebElement())
     //    .perform();
-
-    this.element.trigger('mouseover');
+    debugger;
+    cy.wrap(this.element).trigger('mouseover');
     return this._stabilize();
   }
 
@@ -138,14 +139,14 @@ export class CypressElement implements TestElement {
     // this.element.trigger('keydown', { keyCode: 192 })
     // cy.wait(50);
     // this.element.trigger('keyup', { keyCode: 192 })
-
-    this.element.type(keys.toString());
+    debugger;
+    cy.wrap(this.element).type(keys.toString());
     return this._stabilize();
   }
 
   async text(): Promise<string> {
     // return this.element.getText();
-    return this.element.invoke('text').promisify();
+    return Cypress.$(this.element).text();;
   }
 
   async getAttribute(name: string): Promise<string | null> {
@@ -154,12 +155,9 @@ export class CypressElement implements TestElement {
     //    this.element,
     //    name
     //  );
-
     // this might work the same way get css value does
-    return this.element
-      .invoke('attr', name)
-      .promisify()
-      .then((val: string) => val);
+    const x = Cypress.$(this.element).attr(name)
+    return x || null;
   }
 
   async hasClass(name: string): Promise<boolean> {
@@ -168,20 +166,21 @@ export class CypressElement implements TestElement {
   }
 
   async getDimensions(): Promise<ElementDimensions> {
-    const width = await this.element.invoke('width').promisify() || 0;
-    const height = await this.element.invoke('height').promisify() || 0;
-    const { left, top } = await this.element.invoke('position').promisify();
-
+    const width = await cy.wrap(this.element).invoke('width').promisify() || 0;
+    const height = await cy.wrap(this.element).invoke('height').promisify() || 0;
+    const { left, top } = await cy.wrap(this.element).invoke('position').promisify();
+debugger;
     return { width, height, left, top };
   }
 
   async getProperty(name: string): Promise<any> {
     // return browser.executeScript(
     //   `return arguments[0][arguments[1]]`,
-    //   this.element,
+    //   cy.wrap(this.element),
     //   name
     // );
-    return this.element.its(name).promisify();
+    debugger;
+    return cy.wrap(this.element).its(name).promisify();
   }
 
   async matchesSelector(selector: string): Promise<boolean> {
@@ -190,14 +189,15 @@ export class CypressElement implements TestElement {
     //       return (Element.prototype.matches ||
     //               Element.prototype.msMatchesSelector).call(arguments[0], arguments[1])
     //       `,
-    //   this.element,
+    //   cy.wrap(this.element),
     //   selector
     // );
-    return this.element.then($el => $el.is(selector)).promisify();
+    debugger;
+    return Cypress.$(this.element).is(selector);
   }
 
   async isFocused(): Promise<boolean> {
-    // return this.element.equals(browser.driver.switchTo().activeElement());
-    return this.element.then(($el) => $el.is(document.activeElement || '')).promisify();
+    // return cy.wrap(this.element).equals(browser.driver.switchTo().activeElement());
+    return this.element.then(($el) => Cypress.dom.isFocused(Cypress.$($el))).promisify();
   }
 }

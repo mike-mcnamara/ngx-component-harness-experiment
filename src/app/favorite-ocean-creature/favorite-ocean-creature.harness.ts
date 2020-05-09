@@ -13,7 +13,7 @@ export class FavoriteOceanCreatureHarness extends ComponentHarness {
 
   private coerceRegExp(textFilter: string | RegExp): RegExp {
     return typeof textFilter === 'string'
-      ? new RegExp(`^\s*${textFilter}\s*$`)
+      ? new RegExp(`^\\s*${textFilter}\\s*$`)
       : textFilter;
   }
 

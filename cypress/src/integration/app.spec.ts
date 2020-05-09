@@ -6,15 +6,14 @@ describe('ngx-component-harnesses', () => {
 
   beforeEach(() => {
     cy.visit('/').then(async () => {
-      cy.wait(2000)
       const loader = CypressHarnessEnvironment.loader();
-      debugger;
       harness = await loader.getHarness(FavoriteOceanCreatureHarness);
     })
   });
 
   it('should display your favorite ocean creature in a sentence', async () => {
     const octopus = 'Octopus';
+    // debugger;
     await harness.pickOption({text: octopus});
     const text = await harness.getText();
     expect(text).eql(`My favorite ocean creature is ${octopus}`);
